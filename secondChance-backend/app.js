@@ -3,13 +3,22 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const pinoLogger = require('./logger');
+const secondChanceItemsRoutes = require('./routes/secondChanceItemsRoutes');
 
 const connectToDatabase = require('./models/db');
 const {loadData} = require("./util/import-mongo/index");
 
+const bodyParser = require('body-parser');
+
 
 const app = express();
+app.use(bodyParser.json()); 
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use("*",cors());
+app.use('/api/secondchance/items', secondChanceItemsRoutes);
+
+ 
 const port = 3060;
 
 // Connect to MongoDB; we just do this one time
