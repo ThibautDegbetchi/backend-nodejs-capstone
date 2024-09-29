@@ -2,40 +2,52 @@ const express = require('express');
 const router = express.Router();
 const connectToDatabase = require('../models/db');
 
-// Search for gifts
+// Route pour la recherche
 router.get('/', async (req, res, next) => {
     try {
-        // Task 1: Connect to MongoDB using connectToDatabase database. Remember to use the await keyword and store the connection in `db`
-        // {{insert code here}}
+        // Se connecter à la base de données MongoDB
+        const db = await connectToDatabase();
+        const collection = db.collection("secondChanceItems"); // Assurez-vous que la collection est correcte
 
-        const collection = db.collection("gifts");
-
-        // Initialize the query object
+        // Initialiser un objet de requête vide
         let query = {};
 
-        // Add the name filter to the query if the name parameter is not empty
-        // if (/* {{insert code here}} */) {
-            query.name = { $regex: req.query.name, $options: "i" }; // Using regex for partial match, case-insensitive
-        // }
+        // Vérifier si le paramètre 'name' est présent et non vide
+        if (req.query.name && req.query.name.trim() !== '') {
+            query.name = { $regex: req.query.name, $options: "i" }; // Recherche insensible à la casse
+        }
 
-        // Task 3: Add other filters to the query
-        if (req.query.category) {
-            // {{insert code here}}
+        // Ajouter un filtre sur la catégorie si le paramètre 'category' est présent
+        if (req.query.category && req.query.category.trim() !== '') {
+            query.category = req.query.category; // Filtre exact sur la catégorie
         }
-        if (req.query.condition) {
-            // {{insert code here}} 
+
+        // Ajouter un filtre sur l'état si le paramètre 'condition' est présent
+        if (req.query.condition && req.query.condition.trim() !== '') {
+            query.condition = req.query.condition; // Filtre exact sur l'état (condition)
         }
+
+        // Ajouter un filtre sur l'âge si le paramètre 'age_years' est présent
         if (req.query.age_years) {
-            // {{insert code here}}
-            query.age_years = { $lte: parseInt(req.query.age_years) };
+            const ageYears = parseInt(req.query.age_years);
+            if (!isNaN(ageYears)) {
+                query.age_years = { $lte: ageYears }; // Chercher des items dont l'âge est inférieur ou égal à celui spécifié
+            }
         }
 
-        // Task 4: Fetch filtered gifts using the find(query) method. Make sure to use await and store the result in the `gifts` constant
-        // {{insert code here here}}
+        // Récupérer les éléments qui correspondent aux critères de recherche
+        const items = await collection.find(query).toArray(); // Utiliser toArray() pour obtenir les résultats sous forme de tableau
 
-        res.json(gifts);
-    } catch (e) {
-        next(e);
+        // Si aucun item trouvé, retourner un message approprié
+        if (items.length === 0) {
+            return res.status(404).json({ message: 'Aucun élément trouvé correspondant aux critères de recherche' });
+        }
+
+        // Retourner les items trouvés
+        res.json(items);
+    } catch (error) {
+        console.error('Erreur lors de la recherche:', error);
+        next(error); // Propager l'erreur vers le middleware de gestion des erreurs
     }
 });
 
