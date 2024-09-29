@@ -5,6 +5,8 @@ const cors = require('cors');
 const pinoLogger = require('./logger');
 const secondChanceItemsRoutes = require('./routes/secondChanceItemsRoutes');
 const searchRoutes=require('./routes/searchRoutes');
+const authRoutes = require('./routes/authRoutes');
+
 const connectToDatabase = require('./models/db');
 const {loadData} = require("./util/import-mongo/index");
 
@@ -18,7 +20,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("*",cors());
 app.use('/api/secondchance/items', secondChanceItemsRoutes);
 app.use('/api/secondchance/search',searchRoutes);
- 
+app.use('/api/auth', authRoutes);
+
 const port = 3060;
 
 // Connect to MongoDB; we just do this one time
