@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const connectToDatabase = require('../models/db'); // Assurez-vous que connectToDatabase est bien défini dans db.js
-const bcryptjs = require('bcryptjs');
+const bcryptjs = require('bcryptjs')
+const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const logger = require('../logger'); // Assurez-vous d'avoir un logger défini
 const JWT_SECRET = process.env.JWT_SECRET; // Le secret JWT doit être défini dans vos variables d'environnement
